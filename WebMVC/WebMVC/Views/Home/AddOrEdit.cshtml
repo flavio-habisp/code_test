@@ -1,0 +1,79 @@
+﻿@model WebMVC.Models.MockData
+@{
+    Layout = null;
+
+}
+
+@using (Ajax.BeginForm("AddUpdate", "Home",  new AjaxOptions { HttpMethod = "POST" }, new { @id = "AjaxformId", @class = "form-horizontal", role = "form" }))
+
+{
+      @Html.AntiForgeryToken() 
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.MockDataId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">              
+                <input id="tag-form-submit" type="submit" class="btn btn-primary" value="Save">
+
+            </div>
+        </div>
+    </div>
+}
+<script>
+
+    $("#tag-form-submit").on('click', function (event) {
+        event.preventDefault(); // Stop page to refresh
+        event.stopImmediatePropagation();
+        form = $(this).closest("form").get(0)
+        $.ajax({
+            type: "POST",
+            url: form.action,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            data: new FormData($("#AjaxformId").get(0)),
+            success: function (response) {
+                if (response.success) {
+                    $("#result").html(response.message);
+                    $("#result").addClass("alert alert-success");
+                }
+                else {
+                    $("#result").html(response.message);
+                    //adding class
+                    $("#result").addClass("alert alert-danger");
+                }
+                $('#result').fadeIn();
+                $('#result').fadeOut(2500, "linear");
+                List()
+            }
+        })
+        return false;
+    });
+
+</script>
