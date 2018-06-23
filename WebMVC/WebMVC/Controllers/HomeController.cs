@@ -15,22 +15,11 @@ namespace WebMVC.Controllers
     {
         public ActionResult Index(int? page, string searchString)
         {
-            MockDataContext mockDataContext = new MockDataContext();
-            List<MockData> mockDatasList = mockDataContext.MockDatas.ToList();
-
-            var mockDatas = from s in mockDatasList
-                           select s;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                mockDatas = mockDatas.Where( s => !string.IsNullOrEmpty(s.FirstName) ? s.FirstName.Contains(searchString) : false 
-                                       || !string.IsNullOrEmpty(s.Email) ? s.Email.Contains(searchString) : false
-                                       || !string.IsNullOrEmpty(s.LastName) ? s.LastName.Contains(searchString) : false);
-            }
+            IEnumerable<MockData> mockDatas = SearchMockData(searchString);
 
             int pageSize = 10;
             int pageNumber = (page ?? 1);
-            ViewBag.searchString = !String.IsNullOrEmpty(searchString)? searchString:string.Empty ;
+            ViewBag.searchString = !String.IsNullOrEmpty(searchString) ? searchString : string.Empty;
             ViewBag.pageNumber = pageNumber;
             ViewBag.pageSize = pageSize;
             return View(mockDatas.ToPagedList(pageNumber, pageSize));
@@ -38,18 +27,7 @@ namespace WebMVC.Controllers
 
         public ActionResult List(int? page, string searchString)
         {
-            MockDataContext mockDataContext = new MockDataContext();
-            List<MockData> mockDatasList = mockDataContext.MockDatas.ToList();
-
-            var mockDatas = from s in mockDatasList
-                            select s;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                mockDatas = mockDatas.Where(s => !string.IsNullOrEmpty(s.FirstName) ? s.FirstName.Contains(searchString) : false
-                                      || !string.IsNullOrEmpty(s.Email) ? s.Email.Contains(searchString) : false
-                                      || !string.IsNullOrEmpty(s.LastName) ? s.LastName.Contains(searchString) : false);
-            }
+            IEnumerable<MockData> mockDatas = SearchMockData(searchString);
 
             int pageSize = 10;
             int pageNumber = (page ?? 1);
@@ -120,5 +98,26 @@ namespace WebMVC.Controllers
 
             }
         }
+
+
+        private static IEnumerable<MockData> SearchMockData(string searchString)
+        {
+            MockDataContext mockDataContext = new MockDataContext();
+            List<MockData> mockDatasList = mockDataContext.MockDatas.ToList();
+
+            var mockDatas = from s in mockDatasList
+                            select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                mockDatas = mockDatas.Where(s => (s.FirstName ?? string.Empty).ToLower().Contains(searchString.ToLower())
+                                            || (s.LastName ?? string.Empty).ToLower().Contains(searchString.ToLower())
+                                            || (s.Email ?? string.Empty).ToLower().Contains(searchString.ToLower())
+                                            );
+            }
+
+            return mockDatas;
+        }
+
     }
 }
